@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
 import { SignUpDto, SignInDto } from './dto';
 import * as argon from "argon2"
 import { PrismaService } from 'src/database/prisma.service';
@@ -39,9 +39,7 @@ export default class AuthService {
     } catch (error) {
       if(error instanceof PrismaClientKnownRequestError){
         if(error.code == 'P2002'){
-          return new ForbiddenException(
-            "A user with this matric number already exists"
-          )
+          return new ForbiddenException("A user with this matric number already exists")
         }
       }
       return error
@@ -68,14 +66,16 @@ export default class AuthService {
       }
 
       const access_token = await this.signToken(user.id, user.matric_no)
-      return {access_token}
+      return access_token
     } catch (error: any) {
       return error.message
     }
   }
 
   logout() {
-    return { message: 'I logged out' };
+    return {
+      message: "Successfully logged out"
+    };
   }
 
   signToken(userId: number, matric_no: string): Promise<string>{
