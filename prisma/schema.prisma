@@ -15,13 +15,32 @@ model User {
  matric_no String? @unique
  first_name String
  last_name String
- Faculty String
- Department String
- email String
+ faculty String?
+ department String?
+ role String @default("student")
+ email String @unique
  password String
  created_at DateTime @default(now())
  updated_at DateTime @updatedAt
 }
+
+model Bill {
+  id Int @id @default(autoincrement())
+  admin_id String
+  amount Float
+  title String
+  account_no String
+  bank_name String
+  faculty String?
+  department String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+// enum Role {
+//   STUDENT
+//   ADMIN
+// }
 
 // model Admin {
 //   id Int @id @default(autoincrement())
