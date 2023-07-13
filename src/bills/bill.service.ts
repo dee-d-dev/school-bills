@@ -156,47 +156,77 @@ export default class BillService {
     }
 
     getBills = async (user_id: string) => {
-        const user = await this.prisma.user.findUnique({
-            where:{
-                email: user_id,
-            },
-            select: {   
-                department: true,
-                faculty: true,
-            }
-        })
-
-        if(user.faculty && user.department){
-            return await this.prisma.bill.findMany({
-                where: {
-                    OR: [
-                        {faculty: user.faculty},
-                        {department: user.department}
-
-                    ]       
-                }
-            })
-        }
- 
-
-        if(user.faculty){
-            return await this.prisma.bill.findMany({
-                where: {
-                    faculty: user.faculty
-                }
-            })
+        try {
             
-        }
-
-        if(user.department){
-            return await this.prisma.bill.findMany({
-                where: {
-                    department: user.department
-                }, 
+            const user = await this.prisma.user.findFirst({
+                where:{
+                    OR: [
+                        {email: user_id},
+                        {matric_no: user_id}
+                    ]
+                },
+                select: {   
+                    department: true,
+                    faculty: true,
+                }
             })
+
+            if(!user){
+                throw new Error("Can't get bills for this user")
+            }
+    
+            if(user.faculty && user.department){
+                let bills = await this.prisma.bill.findMany({
+                    where: {
+                        OR: [
+                            {faculty: user.faculty},
+                            {department: user.department}
+    
+                        ]       
+                    }
+                })
+
+                if(bills.length <= 0){
+                    return {message: "No bill created for your faculty and department yet"}
+                }
+
+                return bills
+            }
+     
+    
+            if(user.faculty){
+                let bills = await this.prisma.bill.findMany({
+                    where: {
+                        faculty: user.faculty
+                    }
+                })
+                
+                if(bills.length <= 0){
+                    return {message: "No bill created for this faculty yet"}
+                }
+
+                return bills
+            }
+    
+            if(user.department){
+                let bills = await this.prisma.bill.findMany({
+                    where: {
+                        department: user.department
+                    }, 
+                })
+
+                if(bills.length <= 0){
+                    return {message: "No bill created for this department yet"}
+                }
+
+                return bills
+            }
+    
+    
+           
+        
+        } catch (error) {
+            throw new ForbiddenException(error.message).getResponse()
         }
-
-
-       
     }
 }

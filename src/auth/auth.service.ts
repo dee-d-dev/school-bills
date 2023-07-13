@@ -27,6 +27,15 @@ export default class AuthService {
         }
       }
 
+      if(role == "student"){
+        if(!faculty){
+          throw new ForbiddenException("A student must have a faculty and department")
+        }
+        if(!department){
+          throw new ForbiddenException("A student must have a faculty and department")
+        }
+      }
+
       //generate password hash
       const hashedPassword = await argon.hash(password)
 
@@ -44,6 +53,34 @@ export default class AuthService {
       }
 
 
+      if(department){
+
+        const departmentAdminCount = await this.prisma.user.count({
+          where: {
+            role: 'admin',
+            department: department
+          }
+        })
+
+        if(departmentAdminCount >= 2){
+          throw new ForbiddenException("Maximum number of admins for this department has been reached")
+        }
+      }
+
+      if(faculty){
+        const facultyAdminCount = await this.prisma.user.count({
+          where: {
+            role: 'admin',
+            faculty: faculty
+          }
+        })
+
+        if(facultyAdminCount >= 2) {
+          throw new ForbiddenException("Maximum number of admins for this faculty has been reached")
+
+        }
+      }
+      
 
       //save user to db
       const user = await this.prisma.user.create({
@@ -66,12 +103,8 @@ export default class AuthService {
   
       return user;
     } catch (error) {
-      if(error instanceof PrismaClientKnownRequestError){
-        if(error.code == 'P2002'){
-          return new ForbiddenException("A user with this matric-number/Email already exists")
-        }
-      }
-      return error
+      
+      return new ForbiddenException(error.message).getResponse()
     }
   }
 
