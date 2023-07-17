@@ -1,16 +1,18 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateBillDto, EditBillDto } from './dto';
 import { PrismaService } from 'src/database/prisma.service';
+import Paystack from 'src/utils/paystack';
+import { paymentDTO } from './dto/payment.dto';
 
 
 @Injectable()
 export default class BillService {
-    constructor(private prisma: PrismaService){}
+    constructor(private prisma: PrismaService, private paystack: Paystack){}
 
 
     createBill = async (dto: CreateBillDto, admin_id: string) => {
         try {
-            const {amount, title, account_no, bank_name, faculty, department} = dto
+            const {faculty, department} = dto
             // const {faculty, department} = data
             
             const admin = await this.prisma.user.findUnique({
@@ -28,9 +30,6 @@ export default class BillService {
                     throw new Error("You are not allowed to create a bill for this faculty, You are not an admin in this faculty")
                 }
                 
-                // if(admin.faculty != department){
-                //     throw new Error("You are not allowed to create a bill for this department, You are not an admin in this department")
-                // }
             }
 
             if(department){
@@ -38,26 +37,33 @@ export default class BillService {
                     throw new Error("You are not allowed to create a bill for this department, You are not an admin in this department")
                 }
 
-                // if(admin.department != faculty){
-                //     throw new Error("You are not allowed to create a bill for this faculty, You are not an admin in this faculty")
-                // }
             }
 
+            // const transaction = await this.paystack.initializeTransaction({
+            //     amount: dto.amount * 100,
+            //     email: "dummy@gmail.com",    
+            // })
 
-            return this.prisma.bill.create({
+
+            const bill = await this.prisma.bill.create({
                 data: {
                     ...dto,
                     admin_id
                 }
             })
+
+            return bill
+            // const {data} = transaction
+            // return data.authorization_url
+
             
         } catch (error: any) {
-            throw new ForbiddenException(error.message)
+            return new ForbiddenException(error.message)
         }
         // return dto
     }
 
-    editBill = async (dto: EditBillDto, id: number, admin_id: string,) => {
+    editBill = async (dto: EditBillDto, id: string, admin_id: string,) => {
         try{
             // const {amount, title, account_no, bank_name, faculty, department} = dto
             const admin = await this.prisma.user.findUnique({
@@ -103,7 +109,7 @@ export default class BillService {
         }
     }
 
-    deleteBill = async (id: number, admin_id: string) => {
+    deleteBill = async (id: string, admin_id: string) => {
         try {
           
             const admin = await this.prisma.user.findUnique({
@@ -225,6 +231,54 @@ export default class BillService {
     
            
         
+        } catch (error) {
+            throw new ForbiddenException(error.message).getResponse()
+        }
+    }
+
+    payBills = async (billId: string, userId: string) => {
+        try {
+            
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    id: userId
+                }
+            })
+
+            if(!user){
+                throw new Error("User does not exist")
+            }
+
+            const bill = await this.prisma.bill.findUnique({
+                where: {
+                    id: billId
+                }
+            })
+
+            if(!bill){
+                throw new Error("Bill does not exist")
+            }
+            const transaction = await this.paystack.initializeTransaction({
+                amount: bill.amount * 100,
+                email: user.email,
+                metadata: {
+                    matric_no: user.matric_no,
+                    bill_id: bill.id
+                },
+            })
+
+            const {data} = transaction
+            return data
+        } catch (error) {
+            throw new ForbiddenException(error.message).getResponse()
+        }
+    }
+
+    verifyPayment = async (reference: string) => {
+        try {
+            const payment = await this.paystack.verifyTransaction(reference)
+            const {data} = payment
+            return data
         } catch (error) {
             throw new ForbiddenException(error.message).getResponse()
         }

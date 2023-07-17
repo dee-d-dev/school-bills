@@ -25,6 +25,35 @@ export default class AuthService {
         if(faculty && department){
           throw new ForbiddenException("You cannot be an admin for a faculty and department, It can only be either a faculty or a department")
         }
+
+        if(department){
+
+          const departmentAdminCount = await this.prisma.user.count({
+            where: {
+              role: 'admin',
+              department: department
+            }
+          })
+  
+          if(departmentAdminCount >= 2){
+            throw new ForbiddenException("Maximum number of admins for this department has been reached")
+            
+          }
+        }
+  
+        if(faculty){
+          const facultyAdminCount = await this.prisma.user.count({
+            where: {
+              role: 'admin',
+              faculty: faculty
+            }
+          })
+  
+          if(facultyAdminCount >= 2) {
+            throw new ForbiddenException("Maximum number of admins for this faculty has been reached")
+            
+          }
+        }
       }
 
       if(role == "student"){
@@ -53,33 +82,7 @@ export default class AuthService {
       }
 
 
-      if(department){
-
-        const departmentAdminCount = await this.prisma.user.count({
-          where: {
-            role: 'admin',
-            department: department
-          }
-        })
-
-        if(departmentAdminCount >= 2){
-          throw new ForbiddenException("Maximum number of admins for this department has been reached")
-        }
-      }
-
-      if(faculty){
-        const facultyAdminCount = await this.prisma.user.count({
-          where: {
-            role: 'admin',
-            faculty: faculty
-          }
-        })
-
-        if(facultyAdminCount >= 2) {
-          throw new ForbiddenException("Maximum number of admins for this faculty has been reached")
-
-        }
-      }
+      
       
 
       //save user to db
@@ -149,7 +152,7 @@ export default class AuthService {
     };
   }
 
-  signToken(userId: number, identity: string, role: string): Promise<string>{
+  signToken(userId: string, identity: string, role: string): Promise<string>{
     const payload = {
       sub: userId,
       identity,

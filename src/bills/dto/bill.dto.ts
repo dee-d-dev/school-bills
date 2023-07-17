@@ -1,4 +1,4 @@
-import {IsDate, IsNotEmpty, IsNumber, IsOptional, IsString} from 'class-validator'
+import {IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString} from 'class-validator'
 import { Transform } from 'class-transformer';
 export class CreateBillDto {
     @IsNotEmpty()
@@ -22,7 +22,7 @@ export class CreateBillDto {
     @IsOptional()
     @IsString()
     @Transform(({value}) => value.toLowerCase())
-    faculty: string;
+    faculty?: string;
 
     @IsOptional()
     @IsString()
@@ -78,4 +78,3 @@ export class EditBillDto {
     // admin_id: number
 
 }
-
