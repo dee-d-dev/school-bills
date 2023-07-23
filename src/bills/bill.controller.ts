@@ -6,12 +6,14 @@ import {
     Put,
     Param, 
     Res,
+    Req,
     Get,
     ParseIntPipe,
     UseGuards, 
     UseInterceptors,
     Injectable,
-    Body
+    Body,
+    HttpCode
 } from "@nestjs/common"
 import BillService from "./bill.service"
 import RoleGuard from "../rbac/role.guard"
@@ -20,6 +22,7 @@ import { JwtGuard } from "src/auth/guards/jwt.guard"
 import { CreateBillDto, EditBillDto } from "./dto"
 import { JwtUser } from "src/auth/decorators/jwt-user.decorator"
 import { Response } from "express"
+
 
 @Controller("bills")
 @UseInterceptors(ClassSerializerInterceptor)
@@ -69,6 +72,25 @@ class BillController {
     @UseGuards(JwtGuard)
     async verifyPayment(@Param("reference") reference: string){
         return this.billService.verifyPayment(reference)
+    }
+
+    @Post("paystack/webhook")
+    @HttpCode(200)
+    async webhook(@Body() body: any, @Req() req: Request, @Res() res: Response){
+        
+        try {
+            // let event = this.billService.webhook(body)
+            
+            const event = req.body;
+            let signature = req.headers['x-paystack-signature']
+
+           const response = await this.billService.handlePaystackWebhook(event, signature)
+
+           console.log(response)
+        } catch (error) {
+            
+        }
+        
     }
     
 }

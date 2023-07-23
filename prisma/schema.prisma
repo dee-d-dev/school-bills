@@ -20,6 +20,7 @@ model User {
   role       String   @default("student")
   email      String   @unique
   password   String
+  bills      Bill[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
@@ -33,6 +34,9 @@ model Bill {
   bank_name  String
   faculty    String?
   department String?
+  paid       Boolean   @default(false)
+  user       User?      @relation(fields: [userId], references: [id])
+  userId     String?
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   Payment    Payment[]

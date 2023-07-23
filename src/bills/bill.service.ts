@@ -3,14 +3,16 @@ import { CreateBillDto, EditBillDto } from './dto';
 import { PrismaService } from 'src/database/prisma.service';
 import Paystack from 'src/utils/paystack';
 import { paymentDTO } from './dto/payment.dto';
+import {createHmac} from 'crypto';
+import { ConfigService } from '@nestjs/config';
 
 
 @Injectable()
 export default class BillService {
-    constructor(private prisma: PrismaService, private paystack: Paystack){}
+    constructor(private prisma: PrismaService, private paystack: Paystack, private config: ConfigService){}
 
 
-    createBill = async (dto: CreateBillDto, admin_id: string) => {
+    public createBill = async (dto: CreateBillDto, admin_id: string) => {
         try {
             const {faculty, department} = dto
             // const {faculty, department} = data
@@ -262,9 +264,11 @@ export default class BillService {
                 amount: bill.amount * 100,
                 email: user.email,
                 metadata: {
+                    first_name: user.first_name,
+                    last_name: user.last_name,
                     matric_no: user.matric_no,
                     bill_id: bill.id
-                },
+                }
             })
 
             const {data} = transaction
@@ -281,6 +285,25 @@ export default class BillService {
             return data
         } catch (error) {
             throw new ForbiddenException(error.message).getResponse()
+        }
+    }
+
+    handlePaystackWebhook = async (eventData: any, signature: any) => {
+        try {
+            let secret = this.config.get('PAYSTACK_SECRET_KEY')
+    
+            const hash = createHmac('sha512', secret).update(JSON.stringify(eventData)).digest('hex');
+    
+            if (hash == signature ) {
+              // Do something with event
+                if (eventData && eventData.event === 'charge.success') {
+                    const transactionId = eventData.data.id
+                    return { message: `Transaction ${transactionId} successful` }
+                }  
+                return eventData
+            } 
+        } catch (error) {
+            return new Error(error.message)
         }
     }
 }
