@@ -22,7 +22,7 @@ export class StudentService {
         }
 
         // console.log(student)
-        
+
         if(student.faculty && student.department){
             let my_bills = await this.prisma.bill.findMany({
                 where: {
@@ -47,33 +47,22 @@ export class StudentService {
         }
  
 
-        // if(user.faculty){
-        //     let bills = await this.prisma.bill.findMany({
-        //         where: {
-        //             faculty: user.faculty
-        //         }
-        //     })
-            
-        //     if(bills.length <= 0){
-        //         return {message: "No bill created for this faculty yet"}
-        //     }
+    }
 
-        //     return bills
-        // }
+    async getMyTransactions(user: any) {
+        const transactions = await this.prisma.transaction.findMany({
+            where: {
+                matric_no: user.identity
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+        })
 
-        // if(user.department){
-        //     let bills = await this.prisma.bill.findMany({
-        //         where: {
-        //             department: user.department
-        //         }, 
-        //     })
+        if(transactions.length <= 0){
+            return {message: "You do not have any transaction currently"}
+        }
 
-        //     if(bills.length <= 0){
-        //         return {message: "No bill created for this department yet"}
-        //     }
-
-        //     return bills
-        // }
-
+        return transactions
     }
 }

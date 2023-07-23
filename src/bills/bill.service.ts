@@ -324,10 +324,10 @@ export default class BillService {
                         }
 
                     })
-                    console.log(eventData)
+                    // console.log(eventData)
                     // return `${eventData.data.metadata.first_name} ${eventData.data.metadata.last_name} with matric number ${ eventData.data.metadata.matric_no} has paid Bill with id ${updateBill.id} successfully`
                     return transaction
-                    // return eventData
+                    
                 }  
             } 
         } catch (error) {

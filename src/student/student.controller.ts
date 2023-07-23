@@ -19,4 +19,11 @@ export class StudentController {
     // return this.studentService.getMyBills(user);
   }
 
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  @Get('transactions')
+  async getMyTransactions(@Res() res: Response, @JwtUser() user: any) {
+    res.json(await this.studentService.getMyTransactions(user));
+  }
+
 }
