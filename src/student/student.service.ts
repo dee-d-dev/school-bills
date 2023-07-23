@@ -1,10 +1,12 @@
 import { Get, Injectable } from '@nestjs/common';
+import BillService from 'src/bills/bill.service';
 import { PrismaService } from 'src/database/prisma.service';
+
 
 @Injectable()
 export class StudentService {
 
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService, private billService: BillService) {}
 
    
     async getMyBills(user: any) {
@@ -20,7 +22,7 @@ export class StudentService {
         }
 
         // console.log(student)
-
+        
         if(student.faculty && student.department){
             let my_bills = await this.prisma.bill.findMany({
                 where: {
@@ -34,6 +36,11 @@ export class StudentService {
 
             if(my_bills.length <= 0){
                 return {message: "You do not have any bill currently"}
+            }
+
+            for(const bill of my_bills){
+                const hasPaid = await this.billService.userHasPaidBill(bill.id, student.id)
+                bill.hasPaid = hasPaid
             }
 
             return my_bills

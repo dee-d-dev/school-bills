@@ -34,6 +34,7 @@ model Bill {
   bank_name  String
   faculty    String?
   department String?
+  hasPaid    Boolean?  @default(false)
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
 }

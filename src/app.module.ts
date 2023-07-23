@@ -10,7 +10,7 @@ import { StudentModule } from './student/student.module';
 
 @Module({
   imports: [AuthModule, PrismaModule, BillModule,ConfigModule.forRoot({isGlobal: true}), StudentModule],
-  controllers: [StudentController],
-  providers: [StudentService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
