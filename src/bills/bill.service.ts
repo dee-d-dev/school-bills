@@ -278,7 +278,10 @@ export default class BillService {
                     matric_no: user.matric_no,
                     user_id: user.id,
                     bill_id: bill.id,
-                    title: bill.title
+                    admin_id: bill.admin_id,
+                    title: bill.title,
+                    department: bill.department,
+                    faculty: bill.faculty,
                 }
             })
 
@@ -311,14 +314,17 @@ export default class BillService {
                    
                     const transaction = await this.prisma.transaction.create({
                         data: {
+                            amount: eventData.data.amount / 100,
+                            title: eventData.data.metadata.title,
                             matric_no: eventData.data.metadata.matric_no,
+                            department: eventData.data.metadata.department,
+                            faculty: eventData.data.metadata.faculty,
                             user_id: eventData.data.metadata.user_id,
                             bill_id: eventData.data.metadata.bill_id,
+                            admin_id: eventData.data.metadata.admin_id,
                             account_no: eventData.data.authorization.last4,
                             bank_name: eventData.data.authorization.bank,
                             reference: eventData.data.reference,
-                            amount: eventData.data.amount / 100,
-                            title: eventData.data.metadata.title,
                             status: eventData.data.status,
                             paid_at: eventData.data.paid_at,
                         }

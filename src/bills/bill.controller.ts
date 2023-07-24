@@ -86,7 +86,7 @@ class BillController {
 
            const response = await this.billService.handlePaystackWebhook(event, signature)
 
-           console.log(response)
+        //    console.log(response)
         } catch (error) {
             
         }

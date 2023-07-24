@@ -44,9 +44,12 @@ model Transaction {
   user_id    String
   user       User     @relation(fields: [user_id], references: [id])
   bill_id    String
+  admin_id   String
   amount     Float
-  reference  String
   title      String
+  department String?
+  faculty    String?
+  reference  String
   account_no String
   bank_name  String
   matric_no  String
