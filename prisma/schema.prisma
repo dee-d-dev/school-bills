@@ -11,20 +11,55 @@ datasource db {
 }
 
 model User {
- id Int @id @default(autoincrement())
- matric_no String? @unique
- first_name String
- last_name String
- Faculty String
- Department String
- email String
- password String
- created_at DateTime @default(now())
- updated_at DateTime @updatedAt
+  id         String   @id @default(cuid())
+  matric_no  String?  @unique
+  first_name String
+  last_name  String
+  faculty    String?
+  department String?
+  role       String   @default("student")
+  email      String   @unique
+  password   String
+  transactions Transaction[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
-// model Admin {
-//   id Int @id @default(autoincrement())
-//   Faculty String
-//   Department String
-// }
+model Bill {
+  id         String    @id @default(cuid())
+  admin_id   String
+  amount     Float
+  title      String
+  account_no String
+  bank_name  String
+  faculty    String?
+  department String?
+  hasPaid    Boolean?  @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model Transaction {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  bill_id    String
+  admin_id   String
+  amount     Float
+  title      String
+  department String?
+  faculty    String?
+  reference  String
+  account_no String
+  bank_name  String
+  matric_no  String
+  status     PaymentStatus   @default(pending)
+  paid_at    DateTime?
+  created_at DateTime @default(now())
+}
+
+enum PaymentStatus {
+  pending
+  overdue
+  success
+}

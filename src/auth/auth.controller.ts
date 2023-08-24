@@ -6,13 +6,16 @@ import {Response} from "express"
 import { JwtGuard } from './guards/jwt.guard';
 
 
+
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService){}
+
     
     @HttpCode(201)
     @Post("signup")
     signup(@Body() dto: SignUpDto){
+       
         return this.authService.signup(dto)
     } 
 

@@ -3,7 +3,6 @@ import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
 import { SignUpDto, SignInDto } from './dto';
 import * as argon from "argon2"
 import { PrismaService } from 'src/database/prisma.service';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
@@ -15,43 +14,111 @@ export default class AuthService {
   async signup(dto: SignUpDto) {
 
     try {
-      
-      //generate password hash
-      const hashedPassword = await argon.hash(dto.password)
+      const {password, matric_no, first_name, last_name, email, faculty, department} = dto
+
+      //set role
+      //if it has matric_no it is a student, if it doesnt it is an admin
+      const role = matric_no? "student": "admin";
+
+      if(role == "admin"){
+        if(faculty && department){
+          throw new ForbiddenException("You cannot be an admin for a faculty and department, It can only be either a faculty or a department")
+        }
+
+        if(department){
+
+          const departmentAdminCount = await this.prisma.user.count({
+            where: {
+              role: 'admin',
+              department: department
+            }
+          })
   
+          if(departmentAdminCount >= 2){
+            throw new ForbiddenException("Maximum number of admins for this department has been reached")
+            
+          }
+        }
+  
+        if(faculty){
+          const facultyAdminCount = await this.prisma.user.count({
+            where: {
+              role: 'admin',
+              faculty: faculty
+            }
+          })
+  
+          if(facultyAdminCount >= 2) {
+            throw new ForbiddenException("Maximum number of admins for this faculty has been reached")
+            
+          }
+        }
+      }
+
+      if(role == "student"){
+        if(!faculty){
+          throw new ForbiddenException("A student must have a faculty and department")
+        }
+        if(!department){
+          throw new ForbiddenException("A student must have a faculty and department")
+        }
+      }
+
+      //generate password hash
+      const hashedPassword = await argon.hash(password)
+
+      let userExists = await this.prisma.user.findFirst({
+        where: {  
+          OR: [
+            {matric_no},
+            {email}
+          ]
+        }
+      })
+
+      if(userExists){
+        return new ForbiddenException("A user with this matric-number/Email already exists")
+      }
+
+
+      
+      
+
       //save user to db
       const user = await this.prisma.user.create({
         data: {
-          matric_no: dto.matric_no,
-          first_name: dto.first_name,
-          last_name: dto.last_name,
-          Faculty: dto.faculty,
-          Department: dto.department,
-          email: dto.email,
+          matric_no,
+          first_name,
+          last_name,
+          faculty,
+          department,
+          email,
+          role,
           password: hashedPassword
   
         }
       })
+
+
   
       delete user.password
   
       return user;
     } catch (error) {
-      if(error instanceof PrismaClientKnownRequestError){
-        if(error.code == 'P2002'){
-          return new ForbiddenException("A user with this matric number already exists")
-        }
-      }
-      return error
+      
+      return new ForbiddenException(error.message).getResponse()
     }
   }
 
   async signin(dto: SignInDto) {
     try {
-      const user = await this.prisma.user.findUnique({
+      const {matric_no, email, password} = dto
+      const user = await this.prisma.user.findFirst({
         where: {
-         
-          matric_no: dto.matric_no  
+          OR: [
+           { matric_no},
+           {email}
+          ]
         }
       })
   
@@ -59,14 +126,20 @@ export default class AuthService {
         return new ForbiddenException("Incorrect login details")
       }
   
-      const checkedPassword = await argon.verify(user.password, dto.password)
+      const checkedPassword = await argon.verify(user.password, password)
   
       if(!checkedPassword){
         return new ForbiddenException("Incorrect login details")
       }
 
-      const access_token = await this.signToken(user.id, user.matric_no)
-      return access_token
+      if(user.role == "admin"){
+        const access_token = await this.signToken(user.id, user.email, user.role)
+        return access_token
+      }else{
+        const access_token = await this.signToken(user.id, user.matric_no, user.role)
+        return access_token
+      }
+
     } catch (error: any) {
       return error.message
     }
@@ -78,16 +151,18 @@ export default class AuthService {
     };
   }
 
-  signToken(userId: number, matric_no: string): Promise<string>{
+  signToken(userId: string, identity: string, role: string): Promise<string>{
     const payload = {
       sub: userId,
-      matric_no
+      identity,
+      role
     }
+
 
     const secret = this.config.get('JWT_SECRET')
 
     return this.jwt.signAsync(payload, {
-      expiresIn: '20m',
+      expiresIn: '1d',
       secret
     })
   }
