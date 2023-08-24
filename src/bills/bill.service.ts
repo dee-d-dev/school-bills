@@ -257,9 +257,18 @@ export default class BillService {
                 }
             })
 
+           
+
             if(!bill){
                 throw new Error("Bill does not exist")
             }
+
+            const userHasPaid = await this.userHasPaidBill(billId, userId)
+
+            if(userHasPaid){
+                throw new Error("You have already paid this bill")
+            }
+            
             const transaction = await this.paystack.initializeTransaction({
                 amount: bill.amount * 100,
                 email: user.email,
@@ -267,7 +276,12 @@ export default class BillService {
                     first_name: user.first_name,
                     last_name: user.last_name,
                     matric_no: user.matric_no,
-                    bill_id: bill.id
+                    user_id: user.id,
+                    bill_id: bill.id,
+                    admin_id: bill.admin_id,
+                    title: bill.title,
+                    department: bill.department,
+                    faculty: bill.faculty,
                 }
             })
 
@@ -297,13 +311,48 @@ export default class BillService {
             if (hash == signature ) {
               // Do something with event
                 if (eventData && eventData.event === 'charge.success') {
-                    const transactionId = eventData.data.id
-                    return { message: `Transaction ${transactionId} successful` }
+                   
+                    const transaction = await this.prisma.transaction.create({
+                        data: {
+                            amount: eventData.data.amount / 100,
+                            title: eventData.data.metadata.title,
+                            matric_no: eventData.data.metadata.matric_no,
+                            department: eventData.data.metadata.department,
+                            faculty: eventData.data.metadata.faculty,
+                            user_id: eventData.data.metadata.user_id,
+                            bill_id: eventData.data.metadata.bill_id,
+                            admin_id: eventData.data.metadata.admin_id,
+                            account_no: eventData.data.authorization.last4,
+                            bank_name: eventData.data.authorization.bank,
+                            reference: eventData.data.reference,
+                            status: eventData.data.status,
+                            paid_at: eventData.data.paid_at,
+                        }
+
+                    })
+                    // console.log(eventData)
+                    // return `${eventData.data.metadata.first_name} ${eventData.data.metadata.last_name} with matric number ${ eventData.data.metadata.matric_no} has paid Bill with id ${updateBill.id} successfully`
+                    return transaction
+                    
                 }  
-                return eventData
             } 
         } catch (error) {
             return new Error(error.message)
+        }
+    }
+
+    userHasPaidBill = async (bill_id: string, user_id: string) => {
+        const userPaid = await this.prisma.transaction.findFirst({
+            where: {
+                user_id,
+                bill_id,
+                status: "success",
+
+            }
+        })
+
+        if(userPaid){
+            return true
         }
     }
 }

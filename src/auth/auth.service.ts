@@ -3,7 +3,6 @@ import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
 import { SignUpDto, SignInDto } from './dto';
 import * as argon from "argon2"
 import { PrismaService } from 'src/database/prisma.service';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
