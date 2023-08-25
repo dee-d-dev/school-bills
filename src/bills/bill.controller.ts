@@ -62,10 +62,12 @@ class BillController {
 
     @Post("pay/:id")
     @UseGuards(JwtGuard)
-    async payBill(@Param("id") id: string, @JwtUser() user: any){
+    async payBill(@Param("id") id: string, @JwtUser() user: any, @Res() res: Response){
 
         const {sub} = user
-        return this.billService.payBills(id, sub) 
+        const response = await this.billService.payBills(id, sub) 
+
+        res.status(response.statusCode).json(response.data)
     }
 
     @Get("verify/:reference")
@@ -75,7 +77,6 @@ class BillController {
     }
 
     @Post("paystack/webhook")
-    @HttpCode(200)
     async webhook(@Body() body: any, @Req() req: Request, @Res() res: Response){
         
         try {
@@ -88,7 +89,7 @@ class BillController {
 
         //    console.log(response)
         } catch (error) {
-            
+            throw error.message
         }
         
     }

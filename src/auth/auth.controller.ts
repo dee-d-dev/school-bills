@@ -12,20 +12,19 @@ export class AuthController {
     constructor(private authService: AuthService){}
 
     
-    @HttpCode(201)
     @Post("signup")
-    signup(@Body() dto: SignUpDto){
+    async signup(@Body() dto: SignUpDto, @Res() res: Response){
        
-        return this.authService.signup(dto)
+        let data = await this.authService.signup(dto)
+        res.status(data.statusCode).json(data)
     } 
 
-    @HttpCode(200)
     @Post("signin")
     async signin(@Body() dto: SignInDto, @Res({passthrough: true}) res: Response){
-        let token = await this.authService.signin(dto)
+        let data = await this.authService.signin(dto)
 
-        res.cookie("access_token", token, {httpOnly: true})
-        return {token}
+        res.cookie("access_token", data.data, {httpOnly: true})
+        res.status(data.statusCode).json(data)
     }
 
     @HttpCode(200)

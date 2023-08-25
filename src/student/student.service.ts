@@ -9,7 +9,7 @@ export class StudentService {
     constructor(private prisma: PrismaService, private billService: BillService) {}
 
    
-    async getMyBills(user: any) {
+    getMyBills = async(user: any) => {
         const student = await this.prisma.user.findFirst({
             where:{
                 matric_no: user.identity
@@ -43,10 +43,117 @@ export class StudentService {
                 bill.hasPaid = hasPaid
             }
 
-            return my_bills
+            return {
+                data: my_bills,
+                message: "Bills fetched successfully",
+                statusCode: 200
+            }
         }
  
 
+    }
+
+    getUnpaidBills = async (user: any) => {
+        const student = await this.prisma.user.findFirst({
+            where:{
+                matric_no: user.identity
+            }
+        })
+
+        if(!student){
+            throw new Error("this student does not exist")
+        }
+
+        if(student.faculty && student.department){
+            let my_bills = await this.prisma.bill.findMany({
+                where: {
+                    OR: [
+                        {faculty: student.faculty},
+                        {department: student.department}
+
+                    ],
+                    hasPaid: false       
+                }
+            })
+
+            if(my_bills.length <= 0){
+                return {message: "You do not have any bill currently"}
+            }
+
+            for(const bill of my_bills){
+                const billStatus = await this.billService.userHasPaidBill(bill.id, student.id)
+                bill.hasPaid = billStatus
+            }
+
+            const my_unpaid_bills = my_bills.filter((bill) => {
+                if(bill.hasPaid == false){
+                    return bill
+                }
+            })
+
+            return {
+                data: my_unpaid_bills,
+                message: "Unpaid Bills fetched successfully",
+                statusCode: 200
+            }
+        }
+        
+    }
+
+    getPaidBills = async (user: any) => {
+        try {
+            
+            const student = await this.prisma.user.findFirst({
+                where:{
+                    matric_no: user.identity
+                }
+            })
+    
+            if(!student){
+                throw new Error("this student does not exist")
+            }
+    
+    
+            if(student.faculty && student.department){
+                let my_bills = await this.prisma.bill.findMany({
+                    where: {
+                        OR: [
+                            {faculty: student.faculty},
+                            {department: student.department}
+    
+                        ]     
+                    }
+                })
+    
+                if(my_bills.length <= 0){
+                    return {
+                        data: [],
+                        statusCode: 200,
+                        message: "You do not have any bill currently"
+                    }
+                }
+    
+                for(const bill of my_bills){
+                    const billStatus = await this.billService.userHasPaidBill(bill.id, student.id)
+                    bill.hasPaid = billStatus
+                }
+    
+                const my_paid_bills = my_bills.filter((bill) => {
+                    if(bill.hasPaid == true){
+                        return bill
+                    }
+                })
+    
+                return {
+                    data: my_paid_bills,
+                    message: "Paid Bills fetched successfully",
+                    statusCode: 200
+                }
+            }
+        } catch (error) {
+            throw new error.message
+        }
+        
     }
 
     async getMyTransactions(user: any) {
@@ -60,9 +167,79 @@ export class StudentService {
         })
 
         if(transactions.length <= 0){
-            return {message: "You do not have any transaction currently"}
+            return {
+                data:[],
+                message: "You do not have any transaction currently",
+                statusCode: 200
+            }
         }
 
-        return transactions
+        return {
+            data:transactions,
+            message: "Successfully fetched transactions",
+            statusCode: 200
+        }
+    }
+
+    async getMyTransactionsByDepartment(user: any) {
+        const userDept = await this.prisma.user.findUnique({
+            where: {
+                matric_no: user.identity
+            }
+        })
+        const transactions = await this.prisma.transaction.findMany({
+            where: {
+                matric_no: user.identity,
+                department: userDept.department
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+        })
+
+        if(transactions.length <= 0){
+            return {
+                data:[],
+                message: "You do not have any department transaction currently",
+                statusCode: 200
+            }
+        }
+
+        return {
+            data:transactions,
+            message: "Successfully fetched department transactions",
+            statusCode: 200
+        }
+    }
+
+    async getMyTransactionsByFaculty(user: any) {
+        const userFaculty = await this.prisma.user.findUnique({
+            where: {
+                matric_no: user.identity
+            }
+        })
+        const transactions = await this.prisma.transaction.findMany({
+            where: {
+                matric_no: user.identity,
+                faculty: userFaculty.faculty
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+        })
+
+        if(transactions.length <= 0){
+            return {
+                data:[],
+                message: "You do not have any faculty transaction currently",
+                statusCode: 200
+            }
+        }
+
+        return {
+            data:transactions,
+            message: "Successfully fetched department transactions",
+            statusCode: 200
+        }
     }
 }

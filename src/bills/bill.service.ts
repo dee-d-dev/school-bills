@@ -54,13 +54,16 @@ export default class BillService {
                 }
             })
 
-            return bill
+            return {
+                data:[bill],
+                message: "Bill created successfully"
+            }
             // const {data} = transaction
             // return data.authorization_url
 
             
         } catch (error: any) {
-            return new ForbiddenException(error.message)
+            throw new ForbiddenException(error.message)
         }
         // return dto
     }
@@ -286,7 +289,11 @@ export default class BillService {
             })
 
             const {data} = transaction
-            return data
+            return { 
+                data,
+                message: "bill paid successfully",
+                statusCode: 200
+            }
         } catch (error) {
             throw new ForbiddenException(error.message).getResponse()
         }
@@ -311,6 +318,13 @@ export default class BillService {
             if (hash == signature ) {
               // Do something with event
                 if (eventData && eventData.event === 'charge.success') {
+                   await this.prisma.bill.update({
+                    where: {
+                        id: eventData.data.metadata.bill_id
+                    }, data: {
+                        hasPaid: true
+                    }
+                   })
                    
                     const transaction = await this.prisma.transaction.create({
                         data: {
@@ -332,7 +346,11 @@ export default class BillService {
                     })
                     // console.log(eventData)
                     // return `${eventData.data.metadata.first_name} ${eventData.data.metadata.last_name} with matric number ${ eventData.data.metadata.matric_no} has paid Bill with id ${updateBill.id} successfully`
-                    return transaction
+                    return {
+                        data:transaction,
+                        message: "successful",
+                        statusCode: 201
+                    }
                     
                 }  
             } 
@@ -353,6 +371,8 @@ export default class BillService {
 
         if(userPaid){
             return true
+        }else {
+            return false
         }
     }
 }
