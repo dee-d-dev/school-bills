@@ -7,10 +7,11 @@ import { BillModule } from './bills/bill.module';
 import { StudentService } from './student/student.service';
 import { StudentModule } from './student/student.module';
 import { AdminModule } from './admin/admin.module';
+import { ArticleModule } from './articles/article.module';
 
 
 @Module({
-  imports: [AuthModule, PrismaModule, BillModule,ConfigModule.forRoot({isGlobal: true}), StudentModule, AdminModule],
+  imports: [AuthModule, PrismaModule, BillModule,ConfigModule.forRoot({isGlobal: true}), StudentModule, AdminModule, ArticleModule],
   controllers: [],
   providers: [],
 })

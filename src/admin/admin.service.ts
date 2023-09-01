@@ -23,18 +23,18 @@ export class AdminService {
         });
 
         
-            const transactions = await this.prisma.transaction.findMany({
-                where: {
-                    OR: [
-                        {department: admin.department},
-                        {faculty: admin.faculty}
+        const transactions = await this.prisma.transaction.findMany({
+            where: {
+                OR: [
+                    {department: admin.department},
+                    {faculty: admin.faculty}
 
-                    ]
-                }
-                
-            }); 
+                ]
+            }
+            
+        }); 
 
-            return transactions
+        return transactions
         
     }
 }

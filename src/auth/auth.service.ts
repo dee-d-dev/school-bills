@@ -77,11 +77,8 @@ export default class AuthService {
       })
 
       if(userExists){
-        return new ForbiddenException("A user with this matric-number/Email already exists")
+        throw new ForbiddenException("A user with this matric-number/Email already exists")
       }
-
-
-      
       
 
       //save user to db
@@ -99,14 +96,16 @@ export default class AuthService {
         }
       })
 
-
-  
       delete user.password
   
-      return user;
+      return {
+        data:user,
+        message: `${user.role} created successfully`,
+        statusCode: 201
+      };
     } catch (error) {
       
-      return new ForbiddenException(error.message).getResponse()
+      throw new ForbiddenException(error.message).getResponse()
     }
   }
 
@@ -123,31 +122,48 @@ export default class AuthService {
       })
   
       if(!user) {
-        return new ForbiddenException("Incorrect login details")
+        return {
+          message: "Incorrect login details",
+          statusCode: 400
+        }
       }
   
       const checkedPassword = await argon.verify(user.password, password)
   
       if(!checkedPassword){
-        return new ForbiddenException("Incorrect login details")
+        return {
+          message: "Incorrect login details",
+          statusCode: 400
+        }
       }
 
       if(user.role == "admin"){
         const access_token = await this.signToken(user.id, user.email, user.role)
-        return access_token
+        return {
+          data: access_token,
+          message: "Logged in successfully",
+          statusCode: 200
+        }
       }else{
         const access_token = await this.signToken(user.id, user.matric_no, user.role)
-        return access_token
+        return {
+          data: access_token,
+          message: "Logged in successfully",
+          statusCode: 200
+        }
       }
 
     } catch (error: any) {
-      return error.message
+      return {
+        message: error.message,
+        statusCode: 400
+      }
     }
   }
 
   logout() {
     return {
-      message: "Successfully logged out"
+      message: "Logged out successfully"
     };
   }
 
