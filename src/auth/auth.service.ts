@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
-import { SignUpDto, SignInDto } from './dto';
+import { SignUpDto, SignInDto, ChangePassword } from './dto';
 import * as argon from "argon2"
 import { PrismaService } from 'src/database/prisma.service';
 import { JwtService } from '@nestjs/jwt';
@@ -159,6 +159,23 @@ export default class AuthService {
         statusCode: 400
       }
     }
+  }
+
+  async changePassword(dto: ChangePassword){
+    const {password, confirmPassword} = dto
+
+    if(password != confirmPassword) {
+      throw new Error("Passwords do not match")
+    }
+
+    // await this.prisma.user.update({
+    //   where:{
+    //     id: 
+    //   },
+    //   data: {
+    //     password
+    //   }
+    // })
   }
 
   logout() {

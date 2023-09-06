@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Res, Post, UseGuards, HttpCode } from '@nestjs/common';
+import { Body, Controller, Res, Req, Post, UseGuards, HttpCode } from '@nestjs/common';
 import AuthService from './auth.service';
 import { SignUpDto, SignInDto } from './dto';
-import {Response} from "express"
+import {Request, Response} from "express"
 import { JwtGuard } from './guards/jwt.guard';
+import { JwtUser } from './decorators/jwt-user.decorator';
 
 
 
@@ -34,6 +35,16 @@ export class AuthController {
         
         res.cookie("access_token", null, {httpOnly: true})
         return this.authService.logout()
+
+    }
+
+    @HttpCode(200)
+    @UseGuards(JwtGuard)
+    @Post("change-password")
+    changePassword(@Res({passthrough: true}) res: Response, @JwtUser() user: any, @Req() req: Request){
+        const {password, confirmPassword} = req.body
+        console.log(req)
+        return this.authService.changePassword({password, confirmPassword})
 
     }
 }

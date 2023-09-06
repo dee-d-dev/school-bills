@@ -58,3 +58,9 @@ export class SignInDto{
   @IsNotEmpty()
   password: string;
 }
+
+export class ChangePassword{
+  @IsNotEmpty()
+  password: string;
+  confirmPassword: string;
+}
