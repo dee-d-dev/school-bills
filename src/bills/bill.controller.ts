@@ -21,7 +21,7 @@ import Role from "../rbac/role.enum"
 import { JwtGuard } from "src/auth/guards/jwt.guard"
 import { CreateBillDto, EditBillDto } from "./dto"
 import { JwtUser } from "src/auth/decorators/jwt-user.decorator"
-import { Response } from "express"
+import { Response, Request } from "express"
 
 
 @Controller("bills")
