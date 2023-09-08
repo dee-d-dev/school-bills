@@ -8,10 +8,11 @@ import { StudentService } from './student/student.service';
 import { StudentModule } from './student/student.module';
 import { AdminModule } from './admin/admin.module';
 import { ArticleModule } from './articles/article.module';
+import { HealthCheckModule } from './health/healthCheck.module';
 
 
 @Module({
-  imports: [AuthModule, PrismaModule, BillModule,ConfigModule.forRoot({isGlobal: true}), StudentModule, AdminModule, ArticleModule],
+  imports: [AuthModule, PrismaModule, BillModule,ConfigModule.forRoot({isGlobal: true}), StudentModule, AdminModule, ArticleModule, HealthCheckModule],
   controllers: [],
   providers: [],
 })
