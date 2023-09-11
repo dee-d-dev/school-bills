@@ -15,26 +15,39 @@ export class AuthController {
     
     @Post("signup")
     async signup(@Body() dto: SignUpDto, @Res() res: Response){
-       
-        let data = await this.authService.signup(dto)
-        res.status(data.statusCode).json(data)
+        try {
+            let data = await this.authService.signup(dto)
+            res.status(data.statusCode).json(data)
+            
+        } catch (error) {
+            throw new Error(error.message)
+        }
     } 
 
     @Post("signin")
     async signin(@Body() dto: SignInDto, @Res({passthrough: true}) res: Response){
-        let data = await this.authService.signin(dto)
-
-        res.cookie("access_token", data.data, {httpOnly: true})
-        res.status(data.statusCode).json(data)
+        try {
+            
+            let data = await this.authService.signin(dto)
+    
+            res.cookie("access_token", data.data, {httpOnly: true})
+            res.status(data.statusCode).json(data)
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 
     @HttpCode(200)
     @UseGuards(JwtGuard)
     @Post("logout")
     logout(@Res({passthrough: true}) res: Response){
-        
-        res.cookie("access_token", null, {httpOnly: true})
-        return this.authService.logout()
+        try {
+            
+            res.cookie("access_token", null, {httpOnly: true})
+            return this.authService.logout()
+        } catch (error) {
+            throw new Error(error.message)
+        }
 
     }
 
@@ -42,9 +55,14 @@ export class AuthController {
     @UseGuards(JwtGuard)
     @Post("change-password")
     changePassword(@Res({passthrough: true}) res: Response, @JwtUser() user: any, @Req() req: Request){
-        const {password, confirmPassword} = req.body
-        console.log(req)
-        return this.authService.changePassword({password, confirmPassword})
+        try {
+            const {password, confirmPassword} = req.body
+            console.log(req)
+            return this.authService.changePassword({password, confirmPassword})
+            
+        } catch (error) {
+            throw new Error(error.message)
+        }
 
     }
 }

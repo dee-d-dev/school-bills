@@ -97,9 +97,21 @@ export default class AuthService {
       })
 
       delete user.password
+
+      let token: string;
+      if(user.role == 'admin'){
+        token = await this.signToken(user.id, user.email, user.role)
+
+      }else {
+        token = await this.signToken(user.id, user.matric_no, user.role)
+      }
+
   
       return {
-        data:user,
+        data:{
+          token,
+          user
+        },
         message: `${user.role} created successfully`,
         statusCode: 201
       };
@@ -129,6 +141,8 @@ export default class AuthService {
       }
   
       const checkedPassword = await argon.verify(user.password, password)
+
+      delete user.password
   
       if(!checkedPassword){
         return {
@@ -140,7 +154,10 @@ export default class AuthService {
       if(user.role == "admin"){
         const access_token = await this.signToken(user.id, user.email, user.role)
         return {
-          data: access_token,
+          data: {
+            token:access_token,
+            user: user,
+          },
           message: "Logged in successfully",
           statusCode: 200
         }
@@ -148,6 +165,7 @@ export default class AuthService {
         const access_token = await this.signToken(user.id, user.matric_no, user.role)
         return {
           data: access_token,
+          user: user,
           message: "Logged in successfully",
           statusCode: 200
         }
@@ -180,7 +198,8 @@ export default class AuthService {
 
   logout() {
     return {
-      message: "Logged out successfully"
+      message: "Logged out successfully",
+      statusCode: 200
     };
   }
 

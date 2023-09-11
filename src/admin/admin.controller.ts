@@ -15,7 +15,16 @@ export class AdminController {
     @HttpCode(200)
     @Get('transactions')
     async getAllTransactions(@Res() res: Response, @JwtUser() user: any) {
-        const transactions = await this.adminService.getAllTransactions(user)
-        res.json(transactions);
+        try {
+            
+            const transactions = await this.adminService.getAllTransactions(user)
+            res.status(200).json({
+                data: transactions,
+                message: "transaction fetched successfully",
+                statusCode: 200
+            });
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 }

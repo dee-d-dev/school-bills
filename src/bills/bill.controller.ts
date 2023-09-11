@@ -34,40 +34,93 @@ class BillController {
     @UseGuards(RoleGuard(Role.ADMIN))
     @UseGuards(JwtGuard)
     async createBill(@Body() dto: CreateBillDto, @JwtUser() user: any, @Res() res: Response){
-        
-        const bill = await this.billService.createBill(dto, user.identity)
-
-        res.status(201).json(bill)
+        try {
+            
+            
+            const bill = await this.billService.createBill(dto, user.identity)
+    
+            res.status(201).json({
+                data: bill,
+                message: "Bill created successfully",
+                statusCode: 201
+            })
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 
     @Put("edit/:id")
     @UseGuards(RoleGuard(Role.ADMIN))
     @UseGuards(JwtGuard)
-    async editBill(@Body() dto: EditBillDto, @Param("id") id: string, @JwtUser() user: any){
-        return this.billService.editBill(dto, id, user.identity)
+    async editBill(@Body() dto: EditBillDto, @Param("id") id: string, @JwtUser() user: any, @Res() res: Response){
+        try {
+            
+            const bill = await this.billService.editBill(dto, id, user.identity)
+    
+            res.status(200).json({
+                data: bill,
+                message: "Bill updated successfully",
+                statusCode: 200
+            })
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 
     @Delete("delete/:id")
     @UseGuards(RoleGuard(Role.ADMIN))
     @UseGuards(JwtGuard)
-    async deleteBill(@Param("id", ParseIntPipe) id: string,@JwtUser() user: any){
-        return this.billService.deleteBill(id, user.identity)
+    async deleteBill(@Param("id") id: string,@JwtUser() user: any, @Res() res: Response){
+        try {
+            
+            const data = await this.billService.deleteBill(id, user.identity)
+    
+            res.status(200).json({
+                data: data,
+                message: "Bill deleted successfully",
+                statusCode: 200
+            })
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 
     @Get("all")
     @UseGuards(JwtGuard)
-    async getBills(@JwtUser() user: any){
-        return this.billService.getBills(user.identity)
+    async getBills(@JwtUser() user: any, @Res() res: Response){
+        try {
+            
+            const bills = await this.billService.getBills(user.identity)
+    
+            res.status(200).json({
+                data: bills,
+                message: "All bills fetched successfully",
+                statusCode: 200
+            })
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 
     @Post("pay/:id")
     @UseGuards(JwtGuard)
     async payBill(@Param("id") id: string, @JwtUser() user: any, @Res() res: Response){
+        try {
+            
+            const {sub} = user
+            const response = await this.billService.payBills(id, sub) 
+    
+            res.status(200).json(
+                { 
+                    data: response,
+                    message: "bill paid successfully",
+                    statusCode: 200
+                }
+            )
+        } catch (error) {
+            throw new Error(error.message)
+        }
 
-        const {sub} = user
-        const response = await this.billService.payBills(id, sub) 
-
-        res.status(response.statusCode).json(response.data)
     }
 
     @Get("verify/:reference")
