@@ -4,6 +4,7 @@ import { Response, Request } from "express"
 
 @Controller("articles")
 export default class ArticleController {
+    
     private articles = new ArticleService()
     
     constructor(){
@@ -12,8 +13,19 @@ export default class ArticleController {
 
     @Get("all")
     async getArticles  (req: Request, @Res() res: Response) {
-        const data = await this.articles.getArticles()
-
-        res.status(200).json(data)
+        try {
+            
+            const data = await this.articles.getArticles()
+    
+            res.status(200).json( 
+                {
+                    data,
+                    message: "articles fetched successfully",
+                    statusCode: 200
+                }
+            )
+        } catch (error) {
+            throw Error(error.message)
+        }
     }
 }

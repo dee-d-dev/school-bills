@@ -289,11 +289,7 @@ export default class BillService {
             })
 
             const {data} = transaction
-            return { 
-                data,
-                message: "bill paid successfully",
-                statusCode: 200
-            }
+            return data
         } catch (error) {
             throw new ForbiddenException(error.message).getResponse()
         }

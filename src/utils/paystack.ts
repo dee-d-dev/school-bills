@@ -15,24 +15,34 @@ export default class Paystack {
     API_KEY=process.env.PAYSTACK_SECRET_KEY
 
     async initializeTransaction(data){
-        let response = await axios.post(`${this.API_URL}/transaction/initialize`, data, {
-            headers: {
-                Authorization: `Bearer ${this.API_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        })
-
-        return response.data
+        try {
+            
+            let response = await axios.post(`${this.API_URL}/transaction/initialize`, data, {
+                headers: {
+                    Authorization: `Bearer ${this.API_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+    
+            return response.data
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 
     async verifyTransaction(reference: string){
-        let response = await axios.get(`${this.API_URL}/transaction/verify/${reference}`, {
-            headers: {
-                Authorization: `Bearer ${this.API_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        })
-
-        return response.data
+        try {
+            
+            let response = await axios.get(`${this.API_URL}/transaction/verify/${reference}`, {
+                headers: {
+                    Authorization: `Bearer ${this.API_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+    
+            return response.data
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 }
