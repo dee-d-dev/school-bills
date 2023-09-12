@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export default class AuthService {
   constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService){}
-
+  private authToken: string | null = null
   async signup(dto: SignUpDto) {
 
     try {
@@ -101,9 +101,12 @@ export default class AuthService {
       let token: string;
       if(user.role == 'admin'){
         token = await this.signToken(user.id, user.email, user.role)
+        this.authToken = token;
 
       }else {
         token = await this.signToken(user.id, user.matric_no, user.role)
+        this.authToken = token;
+
       }
 
   
@@ -164,8 +167,10 @@ export default class AuthService {
       }else{
         const access_token = await this.signToken(user.id, user.matric_no, user.role)
         return {
-          data: access_token,
-          user: user,
+          data:{ 
+            token: access_token,
+            user: user,
+          },
           message: "Logged in successfully",
           statusCode: 200
         }
@@ -217,5 +222,9 @@ export default class AuthService {
       expiresIn: '1d',
       secret
     })
+  }
+
+  getAuthToken(): string | null {
+    return this.authToken;
   }
 }

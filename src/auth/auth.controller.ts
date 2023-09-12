@@ -14,39 +14,53 @@ export class AuthController {
 
     
     @Post("signup")
-    async signup(@Body() dto: SignUpDto, @Res() res: Response){
+    async signup(@Body() dto: SignUpDto, @Res() res: Response, @Req() req: Request){
         try {
             let data = await this.authService.signup(dto)
+
+            // res.cookie("access_token", data.data.token, {httpOnly: true})
+            req.headers.authorization = `Bearer ${data.data.token}`;
+
             res.status(data.statusCode).json(data)
             
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
     } 
 
     @Post("signin")
-    async signin(@Body() dto: SignInDto, @Res({passthrough: true}) res: Response){
+    async signin(@Body() dto: SignInDto, @Res({passthrough: true}) res: Response, @Req() req: Request){
         try {
             
             let data = await this.authService.signin(dto)
     
-            res.cookie("access_token", data.data, {httpOnly: true})
+            // res.cookie("access_token", data.data.token, {httpOnly: true})
+            req.headers.authorization = `Bearer ${data.data.token}`;
             res.status(data.statusCode).json(data)
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
     }
 
     @HttpCode(200)
     @UseGuards(JwtGuard)
     @Post("logout")
-    logout(@Res({passthrough: true}) res: Response){
+    logout(@Res({passthrough: true}) res: Response, @Req() req: Request){
         try {
             
-            res.cookie("access_token", null, {httpOnly: true})
+            req.headers.authorization = null
             return this.authService.logout()
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
 
     }
@@ -61,7 +75,10 @@ export class AuthController {
             return this.authService.changePassword({password, confirmPassword})
             
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
 
     }

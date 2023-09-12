@@ -24,7 +24,10 @@ export class AdminController {
                 statusCode: 200
             });
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
     }
 }

@@ -8,7 +8,11 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategy';
 
 @Module({
-    imports: [JwtModule.register({}), ConfigModule],
+    imports: [JwtModule.register({
+        signOptions: {
+            expiresIn: '1d'
+        }
+    }), ConfigModule],
     controllers: [AuthController],
     providers: [AuthService, JwtStrategy],
 })
