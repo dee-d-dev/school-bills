@@ -55,7 +55,11 @@ export class StudentController {
             
       res.json(await this.studentService.getMyTransactionsByFaculty(user));
     } catch (error) {
-        throw new Error(error.message)
+      res.status(500).json({
+        message: error.message,
+        statusCode: 500
+      })
+
     }
   }
 
@@ -64,13 +68,19 @@ export class StudentController {
   @Get('unpaid-bills')
   async getUnpaidBills(@Res() res: Response,  @JwtUser() user: any){
     try {
-            
-      let response = await this.studentService.getUnpaidBills(user)
-      // console.log(user)
-      res.status(response.statusCode).json(response);
+      let response = await this.studentService.getUnpaidBills(user);
+    
+      if (response.statusCode) {
+        res.status(response.statusCode).json(response);
+      } else {
+        // Handle the case where statusCode is undefined
+        res.status(500).json({ message: 'Internal Server Error' });
+      }
     } catch (error) {
-     res.json(error.message)
+      // Handle other errors
+      res.status(500).json({ message: error.message });
     }
+    
   }
 
   @UseGuards(JwtGuard)
@@ -81,7 +91,10 @@ export class StudentController {
       let response = await this.studentService.getPaidBills(user)
       res.status(response.statusCode).json(response);
     } catch (error) {
-        throw new Error(error.message)
+      res.status(500).json({
+        message: error.message,
+        statusCode: 500
+      })
     }
   }
 

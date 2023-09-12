@@ -45,7 +45,10 @@ class BillController {
                 statusCode: 201
             })
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
     }
 
@@ -63,7 +66,10 @@ class BillController {
                 statusCode: 200
             })
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
     }
 
@@ -81,7 +87,10 @@ class BillController {
                 statusCode: 200
             })
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
     }
 
@@ -98,7 +107,10 @@ class BillController {
                 statusCode: 200
             })
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
     }
 
@@ -118,7 +130,10 @@ class BillController {
                 }
             )
         } catch (error) {
-            throw new Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
 
     }
@@ -142,7 +157,10 @@ class BillController {
 
         //    console.log(response)
         } catch (error) {
-            throw error.message
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
         
     }

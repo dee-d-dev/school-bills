@@ -10,10 +10,20 @@ import { AdminModule } from './admin/admin.module';
 import { ArticleModule } from './articles/article.module';
 import { HealthCheckModule } from './health/healthCheck.module';
 
+import { MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { AuthMiddleware } from './auth/auth.middleware';
 
 @Module({
   imports: [AuthModule, PrismaModule, BillModule,ConfigModule.forRoot({isGlobal: true}), StudentModule, AdminModule, ArticleModule, HealthCheckModule],
   controllers: [],
-  providers: [],
+  providers: [ 
+  
+  ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL }); // Apply the middleware to all routes
+  }
+}

@@ -25,7 +25,10 @@ export default class ArticleController {
                 }
             )
         } catch (error) {
-            throw Error(error.message)
+            res.json({
+                message: error.message,
+                statusCode: 400
+            })
         }
     }
 }
