@@ -73,8 +73,10 @@ export class AuthController {
     changePassword(@Res({passthrough: true}) res: Response, @JwtUser() user: any, @Req() req: Request){
         try {
             const {password, confirmPassword} = req.body
-            console.log(req)
-            return this.authService.changePassword({password, confirmPassword})
+            const {sub} = user
+            console.log(user)
+            console.log(user.sub)
+            return this.authService.changePassword(sub, {password, confirmPassword})
             
         } catch (error) {
             res.json({

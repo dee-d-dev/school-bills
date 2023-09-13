@@ -205,7 +205,11 @@ export default class BillService {
                     }
                 }
 
-                return bills
+                return {
+                    data: bills,
+                    message: "No bill created for your faculty and department yet",
+                    statusCode: 200
+                }
             }
      
     
@@ -224,7 +228,11 @@ export default class BillService {
                     }
                 }
 
-                return bills
+                return {
+                    data: bills,
+                    message: "No bill created for your faculty and department yet",
+                    statusCode: 200
+                }
             }
     
             if(user.department){

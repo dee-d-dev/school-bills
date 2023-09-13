@@ -136,13 +136,6 @@ export default class AuthService {
         }
       })
   
-      if(!user) {
-        return {
-          message: "Incorrect login details",
-          statusCode: 400
-        }
-      }
-  
       const checkedPassword = await argon.verify(user.password, password)
 
       delete user.password
@@ -153,6 +146,14 @@ export default class AuthService {
           statusCode: 400
         }
       }
+
+      if(!user) {
+        return {
+          message: "Incorrect login details",
+          statusCode: 400
+        }
+      }
+  
 
       if(user.role == "admin"){
         const access_token = await this.signToken(user.id, user.email, user.role)
@@ -185,21 +186,28 @@ export default class AuthService {
     }
   }
 
-  async changePassword(dto: ChangePassword){
+  async changePassword(id: string, dto: ChangePassword){
     const {password, confirmPassword} = dto
 
     if(password != confirmPassword) {
       throw new Error("Passwords do not match")
     }
 
-    // await this.prisma.user.update({
-    //   where:{
-    //     id: 
-    //   },
-    //   data: {
-    //     password
-    //   }
-    // })
+    const hashedPassword = await argon.hash(password)
+
+    await this.prisma.user.update({
+      where:{
+        id
+      },
+      data: {
+        password: hashedPassword
+      }
+    })
+
+    return {
+      message: "Password changed successfully",
+      statusCode: 200
+    };
   }
 
   logout() {
