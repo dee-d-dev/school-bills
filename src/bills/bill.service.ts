@@ -243,7 +243,11 @@ export default class BillService {
                     }
                 }
 
-                return bills
+                return {
+                    data: bills,
+                    message: "All bills fetched successfully",
+                    statusCode: 200
+                }
             }
     
     

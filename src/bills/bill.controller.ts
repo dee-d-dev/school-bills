@@ -101,11 +101,7 @@ class BillController {
             
             const bills = await this.billService.getBills(user.identity)
     
-            res.status(200).json({
-                data: bills,
-                message: "All bills fetched successfully",
-                statusCode: 200
-            })
+            res.status(200).json(bills)
         } catch (error) {
             res.json({
                 message: error.message,
