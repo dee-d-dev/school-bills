@@ -2,7 +2,7 @@ import { Controller, Get, UseGuards, Req, Res, HttpCode, Injectable } from '@nes
 import { JwtUser } from 'src/auth/decorators/jwt-user.decorator';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { StudentService } from './student.service';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import RoleGuard from 'src/rbac/role.guard';
 import Role from 'src/rbac/role.enum';
 
