@@ -32,19 +32,21 @@ export class AuthController {
     } 
 
     @Post("signin")
-    async signin(@Body() dto: SignInDto, @Res({passthrough: true}) res: Response, @Req() req: Request){
+    async signin(@Body() dto: SignInDto, @Res() res: Response, @Req() req: Request){
         try {
             
             let data = await this.authService.signin(dto)
     
-            // res.cookie("access_token", data.data.token, {httpOnly: true})
             req.headers.authorization = `Bearer ${data.data.token}`;
+            // console.log(req)
             res.status(data.statusCode).json(data)
         } catch (error) {
-            res.json({
-                message: error.message,
-                statusCode: 400
-            })
+            // res.json({
+            //     message: error.message,
+            //     statusCode: 400
+            // })
+
+            throw new Error(error.message)
         }
     }
 

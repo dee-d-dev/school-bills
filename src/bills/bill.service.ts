@@ -198,7 +198,11 @@ export default class BillService {
                 })
 
                 if(bills.length <= 0){
-                    return {message: "No bill created for your faculty and department yet"}
+                    return {
+                        data: [],
+                        message: "No bill created for your faculty and department yet",
+                        statusCode: 200
+                    }
                 }
 
                 return bills
@@ -213,7 +217,11 @@ export default class BillService {
                 })
                 
                 if(bills.length <= 0){
-                    return {message: "No bill created for this faculty yet"}
+                    return {
+                        data: [],
+                        message: "No bill created for this faculty yet",
+                        statusCode: 200
+                    }
                 }
 
                 return bills
@@ -227,7 +235,12 @@ export default class BillService {
                 })
 
                 if(bills.length <= 0){
-                    return {message: "No bill created for this department yet"}
+
+                    return {
+                        data: [],
+                        message: "No bill created for this department yet",
+                        statusCode: 200
+                    }
                 }
 
                 return bills

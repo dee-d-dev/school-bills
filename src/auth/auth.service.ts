@@ -156,6 +156,7 @@ export default class AuthService {
 
       if(user.role == "admin"){
         const access_token = await this.signToken(user.id, user.email, user.role)
+        // console.log(access_token)
         return {
           data: {
             token:access_token,
