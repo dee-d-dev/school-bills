@@ -15,10 +15,12 @@ export class StudentController {
   @UseGuards(JwtGuard)
   @HttpCode(200)
   @Get('my-bills')
-  async getMyBills(@Res() res: Response, @JwtUser() user: any) {
+  async getMyBills(@Res() res: Response, @JwtUser() user: any, @Req() req: Request) {
     try {
             
       let response = await this.studentService.getMyBills(user)
+      console.log(req)
+
       res.status(200).json(response);
       // return this.studentService.getMyBills(user);
     } catch (error) {

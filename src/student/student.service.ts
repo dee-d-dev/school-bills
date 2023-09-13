@@ -35,7 +35,11 @@ export class StudentService {
             })
 
             if(my_bills.length <= 0){
-                return {message: "You do not have any bill currently"}
+                return {
+                    data: my_bills,
+                    message: "You do not have any bill currently",
+                    statusCode: 200
+                }
             }
 
             for(const bill of my_bills){
@@ -77,7 +81,12 @@ export class StudentService {
             })
 
             if(my_bills.length <= 0){
-                return {message: "You do not have any bill currently"}
+                return {
+                    data: [],
+                    message: "You do not have any bill currently",
+                    statusCode: 200
+
+                }
             }
 
             for(const bill of my_bills){
